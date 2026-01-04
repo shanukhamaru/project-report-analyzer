@@ -1,8 +1,9 @@
-from typing import Dict, List, TypedDict
+from typing import Dict, List, TypedDict, Generator
 
 from langgraph.graph import StateGraph
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
 
 from app.core.logging import get_logger
 from app.core.exceptions import RetrievalError, RAGGenerationError
@@ -51,12 +52,13 @@ class RAGPipeline:
     def __init__(self, vectorstore: FAISSStore) -> None:
         self.vectorstore = vectorstore
 
-        # LM Studio (OpenAI-compatible)
+        # LM Studio (OpenAI-compatible, streaming enabled)
         self.llm = ChatOpenAI(
             model=settings.LMSTUDIO_MODEL,
             temperature=0,
             base_url=settings.LMSTUDIO_API_BASE.strip(),
             api_key=settings.LMSTUDIO_API_KEY,
+            streaming=True,  # ✅ ENABLE STREAMING
         )
 
         self.graph = self._build_graph()
@@ -92,7 +94,7 @@ class RAGPipeline:
             raise RetrievalError("Document retrieval failed") from exc
 
     # --------------------------------------------------------
-    # Generation Node
+    # Generation Node (STREAMING)
     # --------------------------------------------------------
 
     def _generate_node(self, state: RAGState) -> Dict:
@@ -121,8 +123,13 @@ If the answer is not in the context, say "Not found in documents."
 """
 
         try:
-            response = self.llm.invoke(prompt)
-            return {"answer": response.content}
+            full_answer = ""
+
+            for chunk in self.llm.stream([HumanMessage(content=prompt)]):
+                if chunk.content:
+                    full_answer += chunk.content
+
+            return {"answer": full_answer}
 
         except Exception as exc:
             logger.error("LLM generation failed", exc_info=True)

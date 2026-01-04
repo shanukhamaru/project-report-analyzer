@@ -28,21 +28,7 @@ Backend supports token streaming from the LLM.
 🐳 Dockerized Deployment
 Fully containerized for reproducibility and portability.
 
-High-Level Architecture
-User (Chat UI)
-      |
-      v
-Streamlit Interface
-      |
-      v
-RAG Pipeline (LangGraph)
- ├── Retrieval (FAISS)
- ├── Context Assembly
- ├── LLM Generation (LM Studio)
- └── Citation Mapping
-      |
-      v
-Answer + Sources
+
 
 Technology Stack
 Backend & Core Logic
@@ -178,23 +164,7 @@ Follow-up questions without re-upload
 
 Clear separation of answer and sources
 
-Project Structure
-project-report-analyzer/
-│
-├── app/
-│   ├── ingestion/        # PDF loading & parsing
-│   ├── chunking/         # Structure-aware chunking
-│   ├── embeddings/       # Embedding provider
-│   ├── vectorstore/      # FAISS abstraction
-│   ├── rag/              # LangGraph RAG pipeline
-│   ├── ui/               # Streamlit chat UI
-│   └── core/             # Logging, config, exceptions
-│
-├── notebooks/            # Experiments / prototyping
-├── Dockerfile
-├── requirements.txt
-├── .env.example
-└── README.md
+
 
 Running the Application
 Local (Without Docker)
@@ -260,3 +230,4 @@ LangSmith-based observability
 Conclusion
 
 This project demonstrates an end-to-end, production-oriented implementation of a RAG-based document analysis system, handling real-world complexities such as multi-structure PDFs, multi-document retrieval, and explainable AI outputs. The design emphasizes correctness, transparency, and extensibility, aligning with enterprise and assessment expectations.
+
